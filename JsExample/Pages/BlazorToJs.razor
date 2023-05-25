@@ -1,0 +1,33 @@
+﻿@page "/blazor-to-js"
+@inject IJSRuntime JSRuntime
+
+<h3>BlazorToJs</h3>
+
+<p>But click on this button you'll run Blazor method in place of JS method assigned to onclick event.</p>
+<p>Static Blazor method is also run from JS code in index.html file.</p>
+
+<button onclick="@TestJavaScript">Call Blazor from onclick</button>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("runInstanceMethod", DotNetObjectReference.Create(this));
+        }
+    }
+
+    [JSInvokable]
+    public static Task TestJavaScript()
+    {
+        Console.WriteLine("Hello from C#");
+
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public string Message()
+    {
+        return "Hello from instance method";
+    }
+}

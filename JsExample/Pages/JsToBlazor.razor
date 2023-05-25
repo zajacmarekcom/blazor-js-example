@@ -1,0 +1,48 @@
+﻿@page "/js-to-blazor"
+@using JsExample.Models
+
+@inject IJSRuntime JsRuntime
+
+<h3>JsToBlazor</h3>
+<button @onclick="RunFromModule">Run from JS Module</button>
+
+<p>Example of Chart.JS from official documentation (<a href="https://www.chartjs.org/docs/latest/getting-started/">https://www.chartjs.org/docs/latest/getting-started/</a>) used from Blazor code.</p>
+
+<canvas @ref="canvasRef"></canvas>
+
+@code {
+    private ElementReference canvasRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Prepare chart data
+            var chart = new ChartModel
+            {
+                Type = "bar",
+                Data = new ChartData()
+                {
+                    Labels = new[] { "Red", "Blue", "Yellow", "Green", "Purple", "Orange" },
+                    Datasets = new[]
+                    {
+                        new ChartDataset()
+                        {
+                            Label = "# of Votes",
+                            Data = new double[] { 12, 19, 3, 5, 2, 3 },
+                            BorderWidth = "1"
+                        }
+                    }
+                }
+            };
+            var jsObject = await JsRuntime.InvokeAsync<IJSObjectReference>("createChart", canvasRef, chart);
+        }
+    }
+
+    private async Task RunFromModule()
+    {
+        var jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./someModule.js");
+        await jsModule.InvokeVoidAsync("runFromModule");
+    }
+
+}
